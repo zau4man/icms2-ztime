@@ -1,0 +1,72 @@
+:root{
+    --ztime-title-color: #464646;
+}
+#ztime{
+    max-width: 650px;
+    margin: 0 auto;
+}
+.ztime__items{
+    min-height: 100vh;/* fix intersection in first time */
+}
+.ztime__item{
+    cursor: pointer;
+}
+.zitem__info{
+    font-size: 0.9rem;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+.zitem__type{
+    font-weight: bold;
+}
+.zitem__title{
+    display: flex;
+    align-items: center;
+}
+@media(max-width: 500px){
+    .zitem__title{
+        flex-direction: column;
+        padding: 0.5rem 0;
+    }
+}
+.zitem__photo{
+    flex: 0 0 80px;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-position: center center;
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+.zitem__titletext{
+    font-size: 1.4rem;
+    line-height: 1.4rem;
+    color: var(--ztime-title-color);
+    font-weight: bold;
+    padding: 0.5rem 0;
+    user-select: none;
+}
+@media(max-width: 500px){
+    .zitem__titletext{
+        font-size: 1.1rem;
+        line-height: 1.1rem;
+    }
+}
+.zitem__content{
+
+}
+/* animation */
+.ztimeitems-item {
+  display: inline-block;
+  margin-right: 10px;
+}
+.ztimeitems-enter-active,
+.ztimeitems-leave-active {
+  transition: all 1s ease;
+}
+.ztimeitems-enter-from,
+.ztimeitems-leave-to {
+  opacity: 0;
+  transform: translateY(30px);
+}
