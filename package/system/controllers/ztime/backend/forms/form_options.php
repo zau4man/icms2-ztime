@@ -42,8 +42,18 @@ class formZtimeOptions extends cmsForm {
                         'default'   => 'small',
                         'generator' => function () use($preset_generator) {
                             return $preset_generator();
-                        }
+                        },
+                        'rules' => [
+                            ['required']
+                        ]
                     ]),
+                    new fieldString('title', [
+                        'title'     => LANG_ZTIME_OPTIONS_TITLE,
+                        'default'   => 'Тайм-лента',
+                        'rules' => [
+                            ['required']
+                        ]
+                    ])
                 )
             )
         );

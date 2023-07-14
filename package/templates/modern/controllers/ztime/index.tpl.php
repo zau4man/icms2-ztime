@@ -1,6 +1,6 @@
 <?php
-$this->setPageTitle('Тайм-лента');
-$this->addBreadCrumb('Тайм-лента');
+$this->setPageTitle($title);
+$this->addBreadCrumb($title);
 $this->addControllerCSS('ztime');
 $this->addControllerJS('vue.global.prod');
 $this->addControllerJS('ztime');

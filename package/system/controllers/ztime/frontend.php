@@ -16,6 +16,7 @@ class ztime extends cmsFrontend {
         //например, имен полей
 
         return $this->cms_template->render('index', [
+            'title' => $this->getOption('title') ? $this->getOption('title') : 'Тайм-лента'
         ]);
 
     }
