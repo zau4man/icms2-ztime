@@ -10,7 +10,7 @@ function install_package() {
     }
 
     //обновление
-    $core->db->query("UPDATE `{#}controllers` SET `version` = '1.0.1' WHERE `name` = 'ztime';");
+    $core->db->query("UPDATE `{#}controllers` SET `version` = '1.0.3' WHERE `name` = 'ztime';");
 
     return true;
 }

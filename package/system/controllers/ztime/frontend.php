@@ -35,8 +35,14 @@ class ztime extends cmsFrontend {
         if ($type === 'list') {
 
             $this->page = $type_id ? $type_id : 1;//номер страницы
-
-            $items = $this->getFilteredCtypesItems();
+            $types = $this->request->get('types','');
+            $ctypes = false;
+            if($types){
+                $this->setUserTypes($types);
+                $ctypes = explode(',', $types);
+            }
+            $search = $this->request->get('search','');
+            $items = $this->getFilteredCtypesItems($ctypes,$search);
             return $this->cms_template->renderJSON($items);
         }
         if ($type === 'item'){
@@ -52,6 +58,39 @@ class ztime extends cmsFrontend {
             return $this->cms_template->renderJSON($item);
         }
 
+    }
+
+    public function getCtypes() {
+
+        $this->ctypes = $this->getOption('ctypes');
+        $ctypes = $this->model_content->filterIn('name',$this->ctypes)->get('content_types',false,'name');
+        return $ctypes;
+
+    }
+
+    public function actionTypes() {
+
+        if(!$this->getOption('is_types')){
+            return $this->cms_template->renderJSON([]);
+        }
+
+        $ctypes = $this->getCtypes();
+        $user_types = $this->getUserTypes();
+        $ctypes_names = [];
+        foreach ($ctypes as $ctype){
+            $ctypes_names[] = [
+                'id' => $ctype['id'],
+                'name' => $ctype['name'],
+                'title' => $ctype['title'],
+                'active' => $user_types ? (in_array($ctype['name'], $user_types) ? 1 : 0) : 1
+            ];
+        }
+
+        if(count($ctypes_names) == 1){
+            $ctypes_names = [];
+        }
+
+        return $this->cms_template->renderJSON($ctypes_names);
     }
 
     public function filterCtypeWithPhoto() {
@@ -70,26 +109,51 @@ class ztime extends cmsFrontend {
         $model       = cmsCore::getModel('content');
         $table = $model->table_prefix . $ctype_name;
         $ctype = $model->getContentTypeByName($ctype_name);
+        $is_bar = $this->getOption('is_bar');
         return $model
                     ->orderBy('date_pub', 'DESC')
-                    ->getItemById($table, $id, function($item, $model) use($ctype) {
+                    ->getItemById($table, $id, function($item, $model) use($ctype,$is_bar) {
                 $data = $this->makeDataFromItem($item,$ctype);
                 $content = cmsEventsManager::hook('html_filter', [
                     'text' => $item['content']
                 ]);
                 $content = string_replace_svg_icons($content);
                 $data['content'] = $content;
+                if($is_bar && $ctype['is_comments']){
+                    $data['comments'] = $item['comments'];
+                }
+                if($is_bar && $ctype['options']['item_on']){
+                    $data['link'] = href_to($ctype['name'], $item['slug'].'.html');
+                }
                 return $data;
             });
     }
 
-    public function getFilteredCtypesItems() {
+    public function actionTest() {
+
+        $this->preset = $this->getOption('preset') ? $this->getOption('preset') : 'content_list';
+        $this->perpage = 10;
+        $this->ctypes = $this->getOption('ctypes');
+        $this->ctypes_photo = $this->filterCtypeWithPhoto();
+        $this->select_fields = ['title', 'photo', 'date_pub'];
+        $items = $this->getFilteredCtypesItems(false,'алмаз');
+        dump($items);
+
+    }
+
+    public function getFilteredCtypesItems($ctypes_names = false,$search = false) {
+
+        $ctypes = $this->getCtypes();
 
         $model       = cmsCore::getModel('content');
+        if($search){
+            $search = $model->db->escape($search);
+        }
         $select_only = '';
+        $ctypes_names = $ctypes_names ? $ctypes_names : $this->ctypes;
 
-        foreach ($this->ctypes as $key => $ctype_name) {
-            $is_last = empty($this->ctypes[$key + 1]);
+        foreach ($ctypes_names as $key => $ctype_name) {
+            $is_last = empty($ctypes_names[$key + 1]);
             $table   = $model->table_prefix . $ctype_name;
 
             $fields     = [];
@@ -106,16 +170,20 @@ class ztime extends cmsFrontend {
             $fields[]    = "'$ctype_name' AS ctype_name";
             $select_only .= implode(', ', $fields);
             if (!$is_last) {
-                $select_only .= " FROM {#}$table $tbl_prefix UNION SELECT ";
+                $select_only .= " FROM {#}$table $tbl_prefix WHERE ($tbl_prefix.title LIKE '%$search%') UNION SELECT ";
             }
+        }
+
+        if($search){
+            $model->filterLike('title',"%{$search}%");
         }
 
         $model->selectOnly($select_only);
         $model->orderByRaw('date_pub DESC');
         $model->limitPage($this->page,$this->perpage);
 
-        return $model->get($table, function($item, $model) {
-                $ctype = $model->getContentTypeByName($item['ctype_name']);
+        return $model->get($table, function($item, $model) use($ctypes) {
+                $ctype = $ctypes[$item['ctype_name']];
                 return $this->makeDataFromItem($item,$ctype);
             }, false);
 
@@ -145,6 +213,34 @@ class ztime extends cmsFrontend {
             return string_date_format($date, true);
         }
         return string_date_format($date);
+    }
+
+    public function getUserTypes() {
+        $ztime_types_text = $this->getUserTypesText();
+        if($ztime_types_text){
+            return explode(',', $ztime_types_text);
+        }
+        return false;
+
+    }
+
+    public function getUserTypesText() {
+        $ztime_types = cmsUser::getCookie('ztime_types');
+        if ($this->cms_user->is_logged) {
+            $ztime_types_ups = cmsUser::getUPS('ztime_types');
+            if ($ztime_types_ups) {
+                return $ztime_types_ups;
+            }
+        }
+        return $ztime_types;
+
+    }
+
+    public function setUserTypes($text) {
+        cmsUser::setCookie('ztime_types', $text, 604800);//7 days
+        if ($this->cms_user->is_logged) {
+            cmsUser::setUPS('ztime_types', $text);
+        }
     }
 
 }

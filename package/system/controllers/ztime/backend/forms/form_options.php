@@ -53,7 +53,14 @@ class formZtimeOptions extends cmsForm {
                         'rules' => [
                             ['required']
                         ]
-                    ])
+                    ]),
+                    new fieldCheckbox('is_bar', [
+                        'title'     => 'Отображать счетчик комментариев и ссылку перехода на запись'
+                    ]),
+                    new fieldCheckbox('is_types', [
+                        'title' => 'Отображать список типов контента над списком записей ленты',
+                        'hint'  => 'Выводится только если их больше 1'
+                            ])
                 )
             )
         );

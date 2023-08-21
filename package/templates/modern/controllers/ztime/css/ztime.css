@@ -5,9 +5,6 @@
     max-width: 650px;
     margin: 0 auto;
 }
-.ztime__items{
-    min-height: 100vh;/* fix intersection in first time */
-}
 .ztime__item{
     cursor: pointer;
 }
@@ -53,8 +50,31 @@
         line-height: 1.1rem;
     }
 }
-.zitem__content{
-
+.zitem__bar{
+    opacity: 0.8;
+}
+.zitem__bar a{
+    margin-right: 0.5em;
+    font-size: 0.8em;
+}
+.zitem__bar a svg+span, .zitem__bar a span+svg{
+    margin-left: 0.5em;
+}
+.zitem__link{
+    text-transform: uppercase;
+}
+.ztime__types li{
+    margin-bottom: 0.5em;
+}
+.ztime__types li + li{
+    margin-left: 0.5em;
+}
+.ztime__types li a{
+    font-size: 0.9em;
+    text-transform: uppercase;
+}
+.ztime__types + .ztime__search{
+    margin-top: -1rem;
 }
 /* animation */
 .ztimeitems-item {
